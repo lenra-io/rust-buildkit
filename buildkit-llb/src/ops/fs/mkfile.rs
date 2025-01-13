@@ -15,9 +15,8 @@ pub struct MakeFileOperation<'a> {
     output: OutputIdx,
 
     data: Option<Vec<u8>>,
-
-    description: HashMap<String, String>,
-    caps: HashMap<String, bool>,
+    // description: HashMap<String, String>,
+    // caps: HashMap<String, bool>,
 }
 
 impl<'a> MakeFileOperation<'a> {
@@ -33,9 +32,8 @@ impl<'a> MakeFileOperation<'a> {
             output,
 
             data: None,
-
-            caps,
-            description: Default::default(),
+            // caps,
+            // description: Default::default(),
         }
     }
 

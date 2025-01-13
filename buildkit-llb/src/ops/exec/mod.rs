@@ -41,6 +41,7 @@ fn serialization() {
                     extra_hosts: vec![],
                     proxy_env: None,
                 }),
+                secretenv: vec![],
             })
         },
     );

@@ -1,5 +1,4 @@
-`buildkit-llb` - high-level API to create BuildKit LLB graphs
-=======
+# `buildkit-llb` - high-level API to create BuildKit LLB graphs
 
 [![Actions Status]][Actions Link]
 [![buildkit-llb Crates Badge]][buildkit-llb Crates Link]
@@ -10,6 +9,7 @@
 Please check [docs][buildkit-llb Docs Link] or examples on how to use the crate.
 
 The LLB graph from stdout can easily be used with `buildctl`:
+
 ```
 cargo run --example=scratch | buildctl build
 ```

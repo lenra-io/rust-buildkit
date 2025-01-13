@@ -15,9 +15,8 @@ pub struct MakeDirOperation<'a> {
     output: OutputIdx,
 
     make_parents: bool,
-
-    description: HashMap<String, String>,
-    caps: HashMap<String, bool>,
+    // description: HashMap<String, String>,
+    // caps: HashMap<String, bool>,
 }
 
 impl<'a> MakeDirOperation<'a> {
@@ -33,9 +32,8 @@ impl<'a> MakeDirOperation<'a> {
             output,
 
             make_parents: false,
-
-            caps,
-            description: Default::default(),
+            // caps,
+            // description: Default::default(),
         }
     }
 

@@ -29,7 +29,11 @@ impl<'a> Terminal<'a> {
                 .unzip()
         };
 
-        pb::Definition { def, metadata }
+        pb::Definition {
+            def,
+            metadata,
+            source: None,
+        }
     }
 
     pub fn write_definition(self, mut writer: impl Write) -> io::Result<()> {

@@ -14,6 +14,13 @@ pub mod moby {
             pub mod types {
                 include!(concat!(env!("OUT_DIR"), "/moby.buildkit.v1.types.rs"));
             }
+
+            pub mod sourcepolicy {
+                include!(concat!(
+                    env!("OUT_DIR"),
+                    "/moby.buildkit.v1.sourcepolicy.rs"
+                ));
+            }
         }
     }
 }

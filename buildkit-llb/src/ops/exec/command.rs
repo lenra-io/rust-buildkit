@@ -299,6 +299,7 @@ impl<'a> Operation for Command<'a> {
                 network: NetMode::Unset.into(),
                 security: SecurityMode::Sandbox.into(),
                 meta: Some(self.context.clone().into()),
+                secretenv: Vec::new(),
             })),
 
             inputs: inputs.into_iter().flatten().collect(),
