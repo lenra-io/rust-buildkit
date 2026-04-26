@@ -12,11 +12,11 @@ use tonic::Request;
 use buildkit_proto::google::rpc::Status;
 use buildkit_proto::moby::buildkit::v1::frontend::llb_bridge_client::LlbBridgeClient;
 use buildkit_proto::moby::buildkit::v1::frontend::{
-    result::Result as RefResult, ReadFileRequest, ResolveImageConfigRequest, Result as Output,
-    ReturnRequest, SolveRequest,
+    result::Result as RefResult, ReadFileRequest, Ref, ResolveImageConfigRequest,
+    Result as Output, ReturnRequest, SolveRequest,
 };
 
-pub use buildkit_llb::ops::source::{ImageSource, ResolveMode};
+pub use buildkit_llb::ops::source::ImageSource;
 pub use buildkit_llb::ops::Terminal;
 pub use buildkit_proto::moby::buildkit::v1::frontend::FileRange;
 
@@ -47,6 +47,7 @@ impl Bridge {
             platform: None,
             resolve_mode: image.resolve_mode().unwrap_or_default().to_string(),
             log_name: log.unwrap_or_default().into(),
+            ..Default::default()
         };
 
         debug!("requesting to resolve an image: {:?}", request);
@@ -109,7 +110,7 @@ impl Bridge {
         };
 
         match inner {
-            RefResult::Ref(inner) => Ok(OutputRef(inner)),
+            RefResult::Ref(inner) => Ok(OutputRef(inner.id)),
             other => bail!("Unexpected solve response: {:?}", other),
         }
     }
@@ -160,8 +161,12 @@ impl Bridge {
         let request = ReturnRequest {
             error: None,
             result: Some(Output {
-                result: Some(RefResult::Ref(output.0)),
+                result: Some(RefResult::Ref(Ref {
+                    id: output.0,
+                    def: None,
+                })),
                 metadata,
+                attestations: Default::default(),
             }),
         };
 

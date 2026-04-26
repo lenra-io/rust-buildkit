@@ -121,6 +121,7 @@ fn copy_serialization() {
                             allow_wildcard: false,
                             allow_empty_wildcard: false,
                             timestamp: -1,
+                            ..Default::default()
                         })),
                     },
                     FileAction {
@@ -139,6 +140,7 @@ fn copy_serialization() {
                             allow_wildcard: false,
                             allow_empty_wildcard: false,
                             timestamp: -1,
+                            ..Default::default()
                         })),
                     },
                     FileAction {
@@ -157,6 +159,7 @@ fn copy_serialization() {
                             allow_wildcard: false,
                             allow_empty_wildcard: false,
                             timestamp: -1,
+                            ..Default::default()
                         })),
                     },
                 ],
@@ -246,6 +249,7 @@ fn copy_with_params_serialization() {
                             allow_wildcard: false,
                             allow_empty_wildcard: false,
                             timestamp: -1,
+                            ..Default::default()
                         })),
                     },
                     FileAction {
@@ -264,6 +268,7 @@ fn copy_with_params_serialization() {
                             allow_wildcard: false,
                             allow_empty_wildcard: false,
                             timestamp: -1,
+                            ..Default::default()
                         })),
                     },
                     FileAction {
@@ -282,6 +287,7 @@ fn copy_with_params_serialization() {
                             allow_wildcard: false,
                             allow_empty_wildcard: false,
                             timestamp: -1,
+                            ..Default::default()
                         })),
                     },
                     FileAction {
@@ -300,6 +306,7 @@ fn copy_with_params_serialization() {
                             allow_wildcard: true,
                             allow_empty_wildcard: false,
                             timestamp: -1,
+                            ..Default::default()
                         })),
                     },
                 ],

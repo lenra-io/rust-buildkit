@@ -2,6 +2,7 @@
 #![deny(clippy::all)]
 
 use failure::{Error, ResultExt};
+use hyper_util::rt::TokioIo;
 use log::*;
 use serde::de::DeserializeOwned;
 use tonic::transport::Endpoint;
@@ -59,7 +60,9 @@ where
 {
     let channel = {
         Endpoint::from_static("http://[::]:50051")
-            .connect_with_connector(service_fn(stdio_connector))
+            .connect_with_connector(service_fn(|uri| async move {
+                stdio_connector(uri).await.map(TokioIo::new)
+            }))
             .await?
     };
 

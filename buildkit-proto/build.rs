@@ -1,6 +1,6 @@
 use std::io::Result;
 fn main() -> Result<()> {
-    prost_build::compile_protos(
+    tonic_build::configure().compile_protos(
         &[
             "proto/github.com/moby/buildkit/api/types/worker.proto",
             "proto/github.com/moby/buildkit/frontend/gateway/pb/gateway.proto",

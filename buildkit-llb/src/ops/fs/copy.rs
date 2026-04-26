@@ -48,7 +48,7 @@ impl OpWithoutSource {
         }
     }
 
-    pub fn from<P>(self, source: LayerPath<'_, P>) -> OpWithSource
+    pub fn from<P>(self, source: LayerPath<'_, P>) -> OpWithSource<'_>
     where
         P: AsRef<Path>,
     {

@@ -40,6 +40,8 @@ fn serialization() {
 
                     extra_hosts: vec![],
                     proxy_env: None,
+
+                    ..Default::default()
                 }),
                 secretenv: vec![],
             })
@@ -83,7 +85,11 @@ fn serialization_with_env_iter() {
 
                     extra_hosts: vec![],
                     proxy_env: None,
+
+                    ..Default::default()
                 }),
+
+                ..Default::default()
             })
         },
     );
@@ -114,7 +120,11 @@ fn serialization_with_cwd() {
 
                     extra_hosts: vec![],
                     proxy_env: None,
+
+                    ..Default::default()
                 }),
+
+                ..Default::default()
             })
         },
     );
@@ -145,7 +155,11 @@ fn serialization_with_user() {
 
                     extra_hosts: vec![],
                     proxy_env: None,
+
+                    ..Default::default()
                 }),
+
+                ..Default::default()
             })
         },
     );
@@ -222,6 +236,8 @@ fn serialization_with_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: -1,
@@ -233,6 +249,8 @@ fn serialization_with_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: 1,
@@ -244,6 +262,8 @@ fn serialization_with_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: 2,
@@ -255,6 +275,8 @@ fn serialization_with_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: -1,
@@ -269,6 +291,8 @@ fn serialization_with_mounts() {
                         }),
                         secret_opt: None,
                         ssh_opt: None,
+
+                        ..Default::default()
                     },
                 ],
                 network: NetMode::Unset.into(),
@@ -281,7 +305,11 @@ fn serialization_with_mounts() {
 
                     extra_hosts: vec![],
                     proxy_env: None,
+
+                    ..Default::default()
                 }),
+
+                ..Default::default()
             })
         },
     );
@@ -329,6 +357,8 @@ fn serialization_with_several_root_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: -1,
@@ -340,6 +370,8 @@ fn serialization_with_several_root_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: -1,
@@ -351,6 +383,8 @@ fn serialization_with_several_root_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+
+                        ..Default::default()
                     },
                 ],
                 network: NetMode::Unset.into(),
@@ -363,7 +397,11 @@ fn serialization_with_several_root_mounts() {
 
                     extra_hosts: vec![],
                     proxy_env: None,
+
+                    ..Default::default()
                 }),
+
+                ..Default::default()
             })
         },
     );
@@ -407,6 +445,8 @@ fn serialization_with_ssh_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: -1,
@@ -422,6 +462,8 @@ fn serialization_with_ssh_mounts() {
                             optional: true,
                             ..Default::default()
                         }),
+
+                        ..Default::default()
                     },
                 ],
                 network: NetMode::Unset.into(),
@@ -434,7 +476,11 @@ fn serialization_with_ssh_mounts() {
 
                     extra_hosts: vec![],
                     proxy_env: None,
+
+                    ..Default::default()
                 }),
+
+                ..Default::default()
             })
         },
     );
