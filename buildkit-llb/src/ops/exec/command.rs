@@ -300,6 +300,7 @@ impl<'a> Operation for Command<'a> {
                 security: SecurityMode::Sandbox.into(),
                 meta: Some(self.context.clone().into()),
                 secretenv: Vec::new(),
+                cdi_devices: Vec::new(),
             })),
 
             inputs: inputs.into_iter().flatten().collect(),

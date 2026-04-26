@@ -38,10 +38,9 @@ fn serialization() {
                     cwd: "/".into(),
                     user: "root".into(),
 
-                    extra_hosts: vec![],
-                    proxy_env: None,
+                    ..Default::default()
                 }),
-                secretenv: vec![],
+                ..Default::default()
             })
         },
     );
@@ -81,9 +80,9 @@ fn serialization_with_env_iter() {
                     cwd: "/".into(),
                     user: "root".into(),
 
-                    extra_hosts: vec![],
-                    proxy_env: None,
+                    ..Default::default()
                 }),
+                ..Default::default()
             })
         },
     );
@@ -108,13 +107,12 @@ fn serialization_with_cwd() {
                 security: SecurityMode::Sandbox.into(),
                 meta: Some(Meta {
                     args: crate::utils::test::to_vec(vec!["cargo", "build"]),
-                    env: vec![],
                     cwd: "/rust-src".into(),
                     user: "root".into(),
 
-                    extra_hosts: vec![],
-                    proxy_env: None,
+                    ..Default::default()
                 }),
+                ..Default::default()
             })
         },
     );
@@ -139,13 +137,12 @@ fn serialization_with_user() {
                 security: SecurityMode::Sandbox.into(),
                 meta: Some(Meta {
                     args: crate::utils::test::to_vec(vec!["cargo", "build"]),
-                    env: vec![],
                     cwd: "/".into(),
                     user: "builder".into(),
 
-                    extra_hosts: vec![],
-                    proxy_env: None,
+                    ..Default::default()
                 }),
+                ..Default::default()
             })
         },
     );
@@ -222,6 +219,7 @@ fn serialization_with_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: -1,
@@ -233,6 +231,7 @@ fn serialization_with_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: 1,
@@ -244,6 +243,7 @@ fn serialization_with_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: 2,
@@ -255,6 +255,7 @@ fn serialization_with_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: -1,
@@ -269,19 +270,19 @@ fn serialization_with_mounts() {
                         }),
                         secret_opt: None,
                         ssh_opt: None,
+                        ..Default::default()
                     },
                 ],
                 network: NetMode::Unset.into(),
                 security: SecurityMode::Sandbox.into(),
                 meta: Some(Meta {
                     args: crate::utils::test::to_vec(vec!["cargo", "build"]),
-                    env: vec![],
                     cwd: "/".into(),
                     user: "root".into(),
 
-                    extra_hosts: vec![],
-                    proxy_env: None,
+                    ..Default::default()
                 }),
+                ..Default::default()
             })
         },
     );
@@ -329,6 +330,7 @@ fn serialization_with_several_root_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: -1,
@@ -340,6 +342,7 @@ fn serialization_with_several_root_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: -1,
@@ -351,19 +354,19 @@ fn serialization_with_several_root_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+                        ..Default::default()
                     },
                 ],
                 network: NetMode::Unset.into(),
                 security: SecurityMode::Sandbox.into(),
                 meta: Some(Meta {
                     args: crate::utils::test::to_vec(vec!["cargo", "build"]),
-                    env: vec![],
                     cwd: "/".into(),
                     user: "root".into(),
 
-                    extra_hosts: vec![],
-                    proxy_env: None,
+                    ..Default::default()
                 }),
+                ..Default::default()
             })
         },
     );
@@ -407,6 +410,7 @@ fn serialization_with_ssh_mounts() {
                         cache_opt: None,
                         secret_opt: None,
                         ssh_opt: None,
+                        ..Default::default()
                     },
                     pb::Mount {
                         input: -1,
@@ -422,19 +426,19 @@ fn serialization_with_ssh_mounts() {
                             optional: true,
                             ..Default::default()
                         }),
+                        ..Default::default()
                     },
                 ],
                 network: NetMode::Unset.into(),
                 security: SecurityMode::Sandbox.into(),
                 meta: Some(Meta {
                     args: crate::utils::test::to_vec(vec!["cargo", "build"]),
-                    env: vec![],
                     cwd: "/".into(),
                     user: "root".into(),
 
-                    extra_hosts: vec![],
-                    proxy_env: None,
+                    ..Default::default()
                 }),
+                ..Default::default()
             })
         },
     );
