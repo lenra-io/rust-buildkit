@@ -47,6 +47,8 @@ impl Bridge {
             platform: None,
             resolve_mode: image.resolve_mode().unwrap_or_default().to_string(),
             log_name: log.unwrap_or_default().into(),
+
+            ..Default::default()
         };
 
         debug!("requesting to resolve an image: {:?}", request);
@@ -130,6 +132,8 @@ impl Bridge {
             r#ref: layer.0.clone(),
             file_path,
             range,
+
+            ..Default::default()
         };
 
         let response = {
@@ -162,6 +166,8 @@ impl Bridge {
             result: Some(Output {
                 result: Some(RefResult::Ref(output.0)),
                 metadata,
+
+                ..Default::default()
             }),
         };
 
