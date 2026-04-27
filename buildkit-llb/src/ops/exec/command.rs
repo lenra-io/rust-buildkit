@@ -11,6 +11,7 @@ use either::Either;
 use super::context::Context;
 use super::mount::Mount;
 
+use crate::ops::platform::Platform;
 use crate::ops::{MultiBorrowedOutput, MultiOwnedOutput, OperationBuilder};
 use crate::serialization::{Context as SerializationCtx, Node, Operation, OperationId, Result};
 use crate::utils::{OperationOutput, OutputIdx};
@@ -27,6 +28,7 @@ pub struct Command<'a> {
     description: HashMap<String, String>,
     caps: HashMap<String, bool>,
     ignore_cache: bool,
+    platform: Option<Platform>,
 }
 
 impl<'a> Command<'a> {
@@ -44,7 +46,16 @@ impl<'a> Command<'a> {
             description: Default::default(),
             caps: Default::default(),
             ignore_cache: false,
+            platform: None,
         }
+    }
+
+    /// Pin this exec op to a specific platform. The op will only be scheduled
+    /// on a worker that advertises matching platform capabilities, which is
+    /// what enables cross-compilation in multi-platform builds.
+    pub fn platform(mut self, platform: Platform) -> Self {
+        self.platform = Some(platform);
+        self
     }
 
     pub fn args<A, S>(mut self, args: A) -> Self
@@ -304,6 +315,7 @@ impl<'a> Operation for Command<'a> {
             })),
 
             inputs: inputs.into_iter().flatten().collect(),
+            platform: self.platform.clone(),
 
             ..Default::default()
         };

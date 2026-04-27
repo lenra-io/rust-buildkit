@@ -373,6 +373,46 @@ fn serialization_with_several_root_mounts() {
 }
 
 #[test]
+fn serialization_with_platform() {
+    use crate::ops::platform;
+    use crate::prelude::*;
+    use buildkit_proto::pb::{op::Op, ExecOp, Meta, NetMode, Platform, SecurityMode};
+
+    crate::check_op!(
+        Command::run("/bin/sh")
+            .args(["-c", "echo arm"])
+            .platform(platform::linux_arm64()),
+        |digest| { "sha256:2aa940f1054e900f52ccd50ff60d018c04855cc91d3470d469fb9cd3eaee10a3" },
+        |description| { vec![] },
+        |caps| { vec![] },
+        |cached_tail| { vec![] },
+        |inputs| { vec![] },
+        |op| {
+            Op::Exec(ExecOp {
+                mounts: vec![],
+                network: NetMode::Unset.into(),
+                security: SecurityMode::Sandbox.into(),
+                meta: Some(Meta {
+                    args: crate::utils::test::to_vec(vec!["/bin/sh", "-c", "echo arm"]),
+                    cwd: "/".into(),
+                    user: "root".into(),
+
+                    ..Default::default()
+                }),
+                ..Default::default()
+            })
+        },
+        |platform| {
+            Some(Platform {
+                os: "linux".into(),
+                architecture: "arm64".into(),
+                ..Default::default()
+            })
+        },
+    );
+}
+
+#[test]
 fn serialization_with_ssh_mounts() {
     use crate::prelude::*;
     use buildkit_proto::pb::{op::Op, ExecOp, Meta, MountType, NetMode, SecurityMode, SshOpt};

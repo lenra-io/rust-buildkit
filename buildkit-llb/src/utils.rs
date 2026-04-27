@@ -174,6 +174,20 @@ pub mod test {
         ($serialized:expr, $context:expr, digest, $value:expr) => {
             assert_eq!($serialized.digest, $value);
         };
+
+        ($serialized:expr, $context:expr, platform, $value:expr) => {{
+            use std::io::Cursor;
+
+            use buildkit_proto::pb;
+            use prost::Message;
+
+            assert_eq!(
+                pb::Op::decode(Cursor::new(&$serialized.bytes))
+                    .unwrap()
+                    .platform,
+                $value,
+            );
+        }};
     }
 
     use std::collections::HashMap;
