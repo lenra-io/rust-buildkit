@@ -44,7 +44,7 @@ enum EnvValue<'de> {
 #[derive(Debug)]
 struct EnvItem<'de>(&'de str);
 
-fn extract_name_and_value(mut raw_value: &str) -> (&str, EnvValue) {
+fn extract_name_and_value(mut raw_value: &str) -> (&str, EnvValue<'_>) {
     if raw_value.starts_with("build-arg:") {
         raw_value = raw_value.trim_start_matches("build-arg:");
     }

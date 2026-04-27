@@ -40,7 +40,7 @@ fn main() {
         .unwrap()
 }
 
-fn build_init_commands(image: &ImageSource) -> Vec<OperationOutput> {
+fn build_init_commands(image: &ImageSource) -> Vec<OperationOutput<'_>> {
     (0..100)
         .map(|idx| {
             let base_dir = format!("/file/{}", idx);
