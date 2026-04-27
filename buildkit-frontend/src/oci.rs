@@ -438,3 +438,107 @@ fn min_serialization() {
         ref_spec
     );
 }
+
+// https://github.com/opencontainers/image-spec/blob/v1.0.1/image-index.md
+// https://github.com/opencontainers/image-spec/blob/v1.0.1/descriptor.md
+
+/// OCI Image Index - the JSON structure used to describe a multi-platform
+/// (a.k.a. manifest list) image. BuildKit's image exporter assembles one
+/// of these from the per-platform refs returned by a frontend, but it can
+/// also be useful to consume an existing index from disk or to attach one
+/// to a return result.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ImageIndex {
+    pub schema_version: u32,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub media_type: Option<String>,
+
+    pub manifests: Vec<Descriptor>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub annotations: Option<BTreeMap<String, String>>,
+}
+
+/// OCI content descriptor pointing at a per-platform manifest inside an
+/// [`ImageIndex`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Descriptor {
+    pub media_type: String,
+    pub digest: String,
+    pub size: u64,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub platform: Option<Platform>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub annotations: Option<BTreeMap<String, String>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub urls: Option<Vec<String>>,
+}
+
+/// OCI Platform descriptor (per-manifest target). Mirrors the JSON shape
+/// of `ocispecs.Platform` from the image-spec, including the dotted
+/// `os.version` / `os.features` keys, so the round-trip with BuildKit's
+/// `refs.platforms` metadata stays stable.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Platform {
+    pub architecture: Architecture,
+    pub os: OperatingSystem,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub variant: Option<String>,
+
+    #[serde(rename = "os.version", skip_serializing_if = "Option::is_none")]
+    pub os_version: Option<String>,
+
+    #[serde(rename = "os.features", skip_serializing_if = "Option::is_none")]
+    pub os_features: Option<Vec<String>>,
+}
+
+#[test]
+fn image_index_roundtrip() {
+    let json = r#"{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.index.v1+json",
+  "manifests": [
+    {
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "digest": "sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f",
+      "size": 7143,
+      "platform": {
+        "architecture": "amd64",
+        "os": "linux"
+      }
+    },
+    {
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "digest": "sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270",
+      "size": 7682,
+      "platform": {
+        "architecture": "arm",
+        "os": "linux",
+        "variant": "v7"
+      }
+    }
+  ]
+}"#;
+
+    let parsed: ImageIndex = serde_json::from_str(json).unwrap();
+    assert_eq!(parsed.schema_version, 2);
+    assert_eq!(parsed.manifests.len(), 2);
+    assert_eq!(
+        parsed.manifests[0].platform.as_ref().unwrap().architecture,
+        Architecture::Amd64
+    );
+    assert_eq!(
+        parsed.manifests[1].platform.as_ref().unwrap().variant,
+        Some("v7".into())
+    );
+
+    // Re-serializing produces the same JSON.
+    assert_eq!(serde_json::to_string_pretty(&parsed).unwrap(), json);
+}
