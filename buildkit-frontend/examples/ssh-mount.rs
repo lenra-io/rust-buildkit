@@ -11,7 +11,7 @@ use buildkit_llb::prelude::*;
 async fn main() {
     env_logger::init();
 
-    if let Err(_) = run_frontend(ReverseFrontend).await {
+    if run_frontend(ReverseFrontend).await.is_err() {
         std::process::exit(1);
     }
 }
@@ -76,23 +76,23 @@ impl ReverseFrontend {
         let mut test = None;
 
         for line in dockerfile_contents.lines() {
-            if line.starts_with("REPO:") {
-                repo = Some(line[5..].trim());
+            if let Some(stripped) = line.strip_prefix("REPO:") {
+                repo = Some(stripped.trim());
             }
 
-            if line.starts_with("TAG:") {
-                tag = Some(line[4..].trim());
+            if let Some(stripped) = line.strip_prefix("TAG:") {
+                tag = Some(stripped.trim());
             }
 
-            if line.starts_with("TEST:") {
-                test = Some(line[5..].trim());
+            if let Some(stripped) = line.strip_prefix("TEST:") {
+                test = Some(stripped.trim());
             }
         }
 
         let rootfs = Source::image("rust:latest");
         let install_command = match (repo, tag) {
             (Some(repo), Some(tag)) => Command::run("cargo")
-                .args(&["install", "--git", repo, "--tag", tag])
+                .args(["install", "--git", repo, "--tag", tag])
                 .mount(Mount::Layer(OutputIdx(0), rootfs.output(), "/"))
                 .mount(Mount::OptionalSshAgent("/tmp/ssh_agent.0"))
                 .env("PATH", PATH)
@@ -108,7 +108,7 @@ impl ReverseFrontend {
 
         let test_command = if let Some(test) = test {
             Command::run("/bin/sh")
-                .args(&["-c", &format!("{} > {}", test, OUTPUT_FILENAME)])
+                .args(["-c", &format!("{} > {}", test, OUTPUT_FILENAME)])
                 .mount(Mount::Layer(OutputIdx(0), install_command.output(0), "/"))
                 .env("PATH", PATH)
         } else {

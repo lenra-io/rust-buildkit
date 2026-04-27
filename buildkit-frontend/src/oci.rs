@@ -210,9 +210,9 @@ impl TryFrom<String> for ExposedPort {
     }
 }
 
-impl Into<String> for ExposedPort {
-    fn into(self) -> String {
-        match self {
+impl From<ExposedPort> for String {
+    fn from(val: ExposedPort) -> Self {
+        match val {
             ExposedPort::Tcp(port) => format!("{}/tcp", port),
             ExposedPort::Udp(port) => format!("{}/udp", port),
         }
@@ -291,40 +291,40 @@ impl From<RawImageConfig> for ImageConfig {
 
             exposed_ports: raw
                 .exposed_ports
-                .map(|inner| inner.into_iter().map(|(port, _)| port).collect()),
+                .map(|inner| inner.into_keys().collect()),
 
             volumes: raw
                 .volumes
-                .map(|inner| inner.into_iter().map(|(volume, _)| volume).collect()),
+                .map(|inner| inner.into_keys().collect()),
         }
     }
 }
 
-impl Into<RawImageConfig> for ImageConfig {
-    fn into(self) -> RawImageConfig {
+impl From<ImageConfig> for RawImageConfig {
+    fn from(val: ImageConfig) -> Self {
         RawImageConfig {
-            user: self.user,
-            entrypoint: self.entrypoint,
-            cmd: self.cmd,
-            working_dir: self.working_dir,
-            labels: self.labels,
-            stop_signal: self.stop_signal,
+            user: val.user,
+            entrypoint: val.entrypoint,
+            cmd: val.cmd,
+            working_dir: val.working_dir,
+            labels: val.labels,
+            stop_signal: val.stop_signal,
 
-            env: self.env.map(|inner| {
+            env: val.env.map(|inner| {
                 inner
                     .into_iter()
                     .map(|(key, value)| format!("{}={}", key, value))
                     .collect()
             }),
 
-            exposed_ports: self.exposed_ports.map(|inner| {
+            exposed_ports: val.exposed_ports.map(|inner| {
                 inner
                     .into_iter()
                     .map(|port| (port, Value::Object(Default::default())))
                     .collect()
             }),
 
-            volumes: self.volumes.map(|inner| {
+            volumes: val.volumes.map(|inner| {
                 inner
                     .into_iter()
                     .map(|volume| (volume, Value::Object(Default::default())))

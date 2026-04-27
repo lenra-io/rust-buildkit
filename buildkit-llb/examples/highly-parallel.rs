@@ -53,7 +53,7 @@ fn build_init_commands(image: &ImageSource) -> Vec<OperationOutput<'_>> {
                 .ref_counted();
 
             Command::run("/bin/sh")
-                .args(&["-c", &shell])
+                .args(["-c", &shell])
                 .mount(Mount::ReadOnlyLayer(image.output(), "/"))
                 .mount(Mount::Layer(OutputIdx(0), output_mount.output(0), "/out"))
                 .ignore_cache(true)
@@ -77,7 +77,7 @@ fn build_modify_commands<'a>(
             );
 
             Command::run("/bin/sh")
-                .args(&["-c", &shell])
+                .args(["-c", &shell])
                 .mount(Mount::ReadOnlyLayer(image.output(), "/"))
                 .mount(Mount::Scratch(OutputIdx(0), "/out"))
                 .mount(Mount::ReadOnlySelector(

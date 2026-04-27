@@ -47,7 +47,7 @@ impl<'a> SingleBorrowedOutput<'a> for HttpSource {
     }
 }
 
-impl<'a> SingleOwnedOutput<'static> for Arc<HttpSource> {
+impl SingleOwnedOutput<'static> for Arc<HttpSource> {
     fn output(&self) -> OperationOutput<'static> {
         OperationOutput::owned(self.clone(), OutputIdx(0))
     }

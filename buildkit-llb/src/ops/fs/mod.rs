@@ -46,6 +46,7 @@ impl FileSystem {
     }
 }
 
+#[allow(clippy::result_unit_err)]
 pub trait FileOperation: Debug + Send + Sync {
     fn output(&self) -> i32;
 

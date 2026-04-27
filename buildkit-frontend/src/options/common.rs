@@ -54,18 +54,18 @@ impl CacheOptionsEntry {
     }
 }
 
-impl Into<CacheOptionsEntryProto> for CacheOptionsEntry {
-    fn into(self) -> CacheOptionsEntryProto {
+impl From<CacheOptionsEntry> for CacheOptionsEntryProto {
+    fn from(val: CacheOptionsEntry) -> Self {
         CacheOptionsEntryProto {
-            r#type: self.cache_type.into(),
-            attrs: self.attrs,
+            r#type: val.cache_type.into(),
+            attrs: val.attrs,
         }
     }
 }
 
-impl Into<String> for CacheType {
-    fn into(self) -> String {
-        match self {
+impl From<CacheType> for String {
+    fn from(val: CacheType) -> Self {
+        match val {
             CacheType::Local => "local".into(),
             CacheType::Registry => "registry".into(),
             CacheType::Inline => "inline".into(),

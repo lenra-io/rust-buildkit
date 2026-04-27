@@ -24,8 +24,9 @@ pub struct ImageSource {
     resolve_mode: Option<ResolveMode>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub enum ResolveMode {
+    #[default]
     Default,
     ForcePull,
     PreferLocal,
@@ -41,11 +42,6 @@ impl fmt::Display for ResolveMode {
     }
 }
 
-impl Default for ResolveMode {
-    fn default() -> Self {
-        ResolveMode::Default
-    }
-}
 
 lazy_static! {
     static ref TAG_EXPR: Regex = Regex::new(r":[\w][\w.-]+$").unwrap();
@@ -171,7 +167,7 @@ impl<'a> SingleBorrowedOutput<'a> for ImageSource {
     }
 }
 
-impl<'a> SingleOwnedOutput<'static> for Arc<ImageSource> {
+impl SingleOwnedOutput<'static> for Arc<ImageSource> {
     fn output(&self) -> OperationOutput<'static> {
         OperationOutput::owned(self.clone(), OutputIdx(0))
     }

@@ -60,7 +60,7 @@ impl<'a> SingleBorrowedOutput<'a> for GitSource {
     }
 }
 
-impl<'a> SingleOwnedOutput<'static> for Arc<GitSource> {
+impl SingleOwnedOutput<'static> for Arc<GitSource> {
     fn output(&self) -> OperationOutput<'static> {
         OperationOutput::owned(self.clone(), OutputIdx(0))
     }

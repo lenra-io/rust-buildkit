@@ -131,7 +131,7 @@ impl<'a> Command<'a> {
     }
 }
 
-impl<'a, 'b: 'a> MultiBorrowedOutput<'b> for Command<'b> {
+impl<'b> MultiBorrowedOutput<'b> for Command<'b> {
     fn output(&'b self, index: u32) -> OperationOutput<'b> {
         // TODO: check if the requested index available.
         OperationOutput::borrowed(self, OutputIdx(index))

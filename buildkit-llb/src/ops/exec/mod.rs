@@ -13,7 +13,7 @@ fn serialization() {
     crate::check_op!(
         {
             Command::run("/bin/sh")
-                .args(&["-c", "echo 'test string' > /out/file0"])
+                .args(["-c", "echo 'test string' > /out/file0"])
                 .env("HOME", "/root")
                 .custom_name("exec custom name")
         },
@@ -53,7 +53,7 @@ fn serialization_with_env_iter() {
 
     crate::check_op!(
         {
-            Command::run("cargo").args(&["build"]).env_iter(vec![
+            Command::run("cargo").args(["build"]).env_iter(vec![
                 ("HOME", "/root"),
                 ("PATH", "/bin"),
                 ("CARGO_HOME", "/root/.cargo"),
@@ -94,7 +94,7 @@ fn serialization_with_cwd() {
     use buildkit_proto::pb::{op::Op, ExecOp, Meta, NetMode, SecurityMode};
 
     crate::check_op!(
-        Command::run("cargo").args(&["build"]).cwd("/rust-src"),
+        Command::run("cargo").args(["build"]).cwd("/rust-src"),
         |digest| { "sha256:b8120a0e1d1f7fcaa3d6c95db292d064524dc92c6cae8b97672d4e1eafcd03fa" },
         |description| { vec![] },
         |caps| { vec![] },
@@ -124,7 +124,7 @@ fn serialization_with_user() {
     use buildkit_proto::pb::{op::Op, ExecOp, Meta, NetMode, SecurityMode};
 
     crate::check_op!(
-        Command::run("cargo").args(&["build"]).user("builder"),
+        Command::run("cargo").args(["build"]).user("builder"),
         |digest| { "sha256:7631ea645e2126e9dbc5d9ae789e34301d9d5c80ce89bfa72bc9b82aa43b57c0" },
         |description| { vec![] },
         |caps| { vec![] },
@@ -160,7 +160,7 @@ fn serialization_with_mounts() {
     let final_image = Source::image("library/alpine:latest");
 
     let command = Command::run("cargo")
-        .args(&["build"])
+        .args(["build"])
         .mount(Mount::ReadOnlyLayer(builder_image.output(), "/"))
         .mount(Mount::Scratch(OutputIdx(1), "/tmp"))
         .mount(Mount::ReadOnlySelector(
@@ -297,7 +297,7 @@ fn serialization_with_several_root_mounts() {
     let final_image = Source::image("library/alpine:latest");
 
     let command = Command::run("cargo")
-        .args(&["build"])
+        .args(["build"])
         .mount(Mount::Scratch(OutputIdx(0), "/tmp"))
         .mount(Mount::ReadOnlyLayer(builder_image.output(), "/"))
         .mount(Mount::Scratch(OutputIdx(1), "/var"))
@@ -379,7 +379,7 @@ fn serialization_with_ssh_mounts() {
 
     let builder_image = Source::image("rustlang/rust:nightly");
     let command = Command::run("cargo")
-        .args(&["build"])
+        .args(["build"])
         .mount(Mount::ReadOnlyLayer(builder_image.output(), "/"))
         .mount(Mount::OptionalSshAgent("/run/buildkit/ssh_agent.0"));
 

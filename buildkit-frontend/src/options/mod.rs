@@ -16,6 +16,7 @@ mod tests {
     #[derive(Debug, Deserialize, PartialEq)]
     #[serde(untagged)]
     #[serde(field_identifier, rename_all = "lowercase")]
+    #[allow(clippy::upper_case_acronyms)]
     enum Debug {
         All,
         LLB,

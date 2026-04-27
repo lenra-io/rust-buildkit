@@ -13,7 +13,7 @@ use buildkit_llb::prelude::*;
 async fn main() {
     env_logger::init();
 
-    if let Err(_) = run_frontend(ReverseFrontend).await {
+    if run_frontend(ReverseFrontend).await.is_err() {
         std::process::exit(1);
     }
 }
@@ -72,7 +72,6 @@ impl ReverseFrontend {
         let transformed_contents: String = {
             String::from_utf8_lossy(&dockerfile_contents)
                 .lines()
-                .into_iter()
                 .map(|line| {
                     line.trim()
                         .chars()
