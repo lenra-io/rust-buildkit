@@ -40,18 +40,14 @@ impl ReverseFrontend {
 
             architecture: Architecture::Amd64,
             os: OperatingSystem::Linux,
+            os_version: None,
+            os_features: None,
+            variant: None,
 
             config: Some(ImageConfig {
-                entrypoint: None,
                 cmd: Some(vec!["/bin/cat".into(), OUTPUT_FILENAME.into()]),
-                env: None,
-                user: None,
                 working_dir: Some("/output".into()),
-
-                labels: None,
-                volumes: None,
-                exposed_ports: None,
-                stop_signal: None,
+                ..Default::default()
             }),
 
             rootfs: None,

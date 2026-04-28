@@ -59,18 +59,15 @@ impl DownloadFrontend {
 
             architecture: Architecture::Amd64,
             os: OperatingSystem::Linux,
+            os_version: None,
+            os_features: None,
+            variant: None,
 
             config: Some(ImageConfig {
                 entrypoint: Some(vec!["/bin/sh".into()]),
                 cmd: Some(vec!["-c".into(), "/usr/bin/sha256sum *".into()]),
-                env: None,
-                user: None,
                 working_dir: Some(OUTPUT_DIR.into()),
-
-                labels: None,
-                volumes: None,
-                exposed_ports: None,
-                stop_signal: None,
+                ..Default::default()
             }),
 
             rootfs: None,
