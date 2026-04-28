@@ -1,3 +1,5 @@
+mod serialization;
+
 #[allow(clippy::all)]
 
 pub mod moby {

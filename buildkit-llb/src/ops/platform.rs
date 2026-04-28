@@ -115,14 +115,7 @@ pub fn darwin_arm64() -> Platform {
 /// `RefMap` and as the suffix on the `containerimage.config/<id>`
 /// metadata key. Examples: `linux/amd64`, `linux/arm/v7`.
 pub fn platform_id(platform: &Platform) -> String {
-    if platform.variant.is_empty() {
-        format!("{}/{}", platform.os, platform.architecture)
-    } else {
-        format!(
-            "{}/{}/{}",
-            platform.os, platform.architecture, platform.variant
-        )
-    }
+    platform.to_string()
 }
 
 #[cfg(test)]
