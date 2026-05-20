@@ -34,3 +34,4 @@ curl "https://raw.githubusercontent.com/planetscale/vtprotobuf/refs/heads/main/i
 # Download protobuf standard files
 curl "https://raw.githubusercontent.com/protocolbuffers/protobuf/main/src/google/protobuf/descriptor.proto" > proto/google/protobuf/descriptor.proto
 curl "https://raw.githubusercontent.com/protocolbuffers/protobuf/main/src/google/protobuf/any.proto" > proto/google/protobuf/any.proto
+curl "https://raw.githubusercontent.com/protocolbuffers/protobuf/main/src/google/protobuf/timestamp.proto" > proto/google/protobuf/timestamp.proto
