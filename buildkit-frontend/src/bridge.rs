@@ -94,7 +94,7 @@ impl Bridge {
         let inner = self.send_solve(graph, cache).await?;
 
         match inner {
-            RefResult::Ref(Ref { id, .. }) => Ok(OutputRef(id)),
+            RefResult::Ref(Ref { id, .. }) | RefResult::RefDeprecated(id) => Ok(OutputRef(id)),
             other => bail!("Unexpected solve response: {:?}", other),
         }
     }
@@ -124,7 +124,7 @@ impl Bridge {
                 .into_iter()
                 .map(|(id, Ref { id: ref_id, .. })| (id, OutputRef(ref_id)))
                 .collect()),
-            RefResult::Ref(Ref { id, .. }) => {
+            RefResult::Ref(Ref { id, .. }) | RefResult::RefDeprecated(id) => {
                 let mut map = HashMap::new();
                 map.insert(String::new(), OutputRef(id));
                 Ok(map)

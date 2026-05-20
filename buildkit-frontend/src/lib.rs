@@ -151,9 +151,10 @@ where
         }
     }
 
-    // TODO: gracefully shutdown the HTTP/2 connection
-
-    Ok(())
+    // The HTTP/2 connection over stdio keeps tonic background tasks alive,
+    // preventing the tokio runtime from shutting down. Force-exit now that
+    // the result has been sent back to the daemon.
+    std::process::exit(0);
 }
 
 async fn frontend_entrypoint<F, O>(bridge: &Bridge, frontend: F) -> Result<FrontendOutput, Error>
