@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-export BUILDKIT_VERSION="v0.29.0"
+export BUILDKIT_VERSION="v0.30.0"
 
 # Create all required directories
 mkdir -p proto/github.com/moby/buildkit/api/types
