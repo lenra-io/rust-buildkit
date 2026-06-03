@@ -15,6 +15,8 @@ pub struct MakeFileOperation<'a> {
     output: OutputIdx,
 
     data: Option<Vec<u8>>,
+    mode: i32,
+    owner: Option<pb::ChownOpt>,
     // description: HashMap<String, String>,
     // caps: HashMap<String, bool>,
 }
@@ -32,6 +34,8 @@ impl<'a> MakeFileOperation<'a> {
             output,
 
             data: None,
+            mode: -1,
+            owner: None,
             // caps,
             // description: Default::default(),
         }
@@ -39,6 +43,19 @@ impl<'a> MakeFileOperation<'a> {
 
     pub fn data(mut self, bytes: Vec<u8>) -> Self {
         self.data = Some(bytes);
+        self
+    }
+
+    /// Override the permission bits of the created file. Pass the mode as an
+    /// integer (e.g. `0o644`); `-1` uses the BuildKit default.
+    pub fn chmod(mut self, mode: i32) -> Self {
+        self.mode = mode;
+        self
+    }
+
+    /// Override the owner of the created file.
+    pub fn chown(mut self, owner: pb::ChownOpt) -> Self {
+        self.owner = Some(owner);
         self
     }
 
@@ -94,14 +111,11 @@ impl<'a> FileOperation for MakeFileOperation<'a> {
 
                 data: self.data.clone().unwrap_or_else(|| Vec::with_capacity(0)),
 
-                // TODO: make this configurable
-                mode: -1,
+                mode: self.mode,
+                owner: self.owner.clone(),
 
                 // TODO: make this configurable
                 timestamp: -1,
-
-                // TODO: make this configurable
-                owner: None,
             })),
         })
     }

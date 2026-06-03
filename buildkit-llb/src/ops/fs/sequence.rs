@@ -48,7 +48,8 @@ impl<'a> SequenceOperation<'a> {
         // TODO: make sure the `inner` elements have monotonic indexes
 
         self.inner
-            .iter().rfind(|fs| fs.output() >= 0)
+            .iter()
+            .rfind(|fs| fs.output() >= 0)
             .map(|fs| fs.output() as u32)
     }
 }

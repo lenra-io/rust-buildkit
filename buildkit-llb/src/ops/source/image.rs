@@ -44,7 +44,6 @@ impl fmt::Display for ResolveMode {
     }
 }
 
-
 lazy_static! {
     static ref TAG_EXPR: Regex = Regex::new(r":[\w][\w.-]+$").unwrap();
 }

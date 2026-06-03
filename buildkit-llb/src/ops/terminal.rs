@@ -123,7 +123,9 @@ fn serialization() {
 
     let mut metadata_digests = {
         definition
-            .metadata.keys().map(|digest| digest.as_str())
+            .metadata
+            .keys()
+            .map(|digest| digest.as_str())
             .collect::<Vec<_>>()
     };
 

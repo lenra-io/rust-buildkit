@@ -12,6 +12,7 @@ pub struct HttpSource {
     id: OperationId,
     url: String,
     file_name: Option<String>,
+    checksum: Option<String>,
     description: HashMap<String, String>,
     ignore_cache: bool,
 }
@@ -25,6 +26,7 @@ impl HttpSource {
             id: OperationId::default(),
             url: url.into(),
             file_name: None,
+            checksum: None,
             description: Default::default(),
             ignore_cache: false,
         }
@@ -37,6 +39,15 @@ impl HttpSource {
         S: Into<String>,
     {
         self.file_name = Some(name.into());
+        self
+    }
+
+    /// Validate the downloaded file against the given digest (`ADD --checksum`).
+    pub fn with_checksum<S>(mut self, checksum: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.checksum = Some(checksum.into());
         self
     }
 }
@@ -80,6 +91,10 @@ impl Operation for HttpSource {
 
         if let Some(ref file_name) = self.file_name {
             attrs.insert("http.filename".into(), file_name.into());
+        }
+
+        if let Some(ref checksum) = self.checksum {
+            attrs.insert("http.checksum".into(), checksum.into());
         }
 
         let head = pb::Op {

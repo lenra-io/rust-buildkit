@@ -15,6 +15,8 @@ pub struct MakeDirOperation<'a> {
     output: OutputIdx,
 
     make_parents: bool,
+    mode: i32,
+    owner: Option<pb::ChownOpt>,
     // description: HashMap<String, String>,
     // caps: HashMap<String, bool>,
 }
@@ -32,6 +34,8 @@ impl<'a> MakeDirOperation<'a> {
             output,
 
             make_parents: false,
+            mode: -1,
+            owner: None,
             // caps,
             // description: Default::default(),
         }
@@ -39,6 +43,19 @@ impl<'a> MakeDirOperation<'a> {
 
     pub fn make_parents(mut self, value: bool) -> Self {
         self.make_parents = value;
+        self
+    }
+
+    /// Override the permission bits of the created directory. Pass the mode as
+    /// an integer (e.g. `0o755`); `-1` uses the BuildKit default.
+    pub fn chmod(mut self, mode: i32) -> Self {
+        self.mode = mode;
+        self
+    }
+
+    /// Override the owner of the created directory.
+    pub fn chown(mut self, owner: pb::ChownOpt) -> Self {
+        self.owner = Some(owner);
         self
     }
 
@@ -94,14 +111,11 @@ impl<'a> FileOperation for MakeDirOperation<'a> {
 
                 make_parents: self.make_parents,
 
-                // TODO: make this configurable
-                mode: -1,
+                mode: self.mode,
+                owner: self.owner.clone(),
 
                 // TODO: make this configurable
                 timestamp: -1,
-
-                // TODO: make this configurable
-                owner: None,
             })),
         })
     }
