@@ -66,13 +66,13 @@ fn serialization() {
     let final_image = Source::image("library/alpine:latest");
 
     let first_command = Command::run("rustc")
-        .args(&["--crate-name", "crate-1"])
+        .args(["--crate-name", "crate-1"])
         .mount(Mount::ReadOnlyLayer(builder_image.output(), "/"))
         .mount(Mount::ReadOnlyLayer(context.output(), "/context"))
         .mount(Mount::Scratch(OutputIdx(0), "/target"));
 
     let second_command = Command::run("rustc")
-        .args(&["--crate-name", "crate-2"])
+        .args(["--crate-name", "crate-2"])
         .mount(Mount::ReadOnlyLayer(builder_image.output(), "/"))
         .mount(Mount::ReadOnlyLayer(context.output(), "/context"))
         .mount(Mount::Scratch(OutputIdx(0), "/target"));
@@ -108,7 +108,7 @@ fn serialization() {
         definition
             .def
             .iter()
-            .map(|bytes| Node::get_digest(&bytes))
+            .map(|bytes| Node::get_digest(bytes))
             .collect::<Vec<_>>(),
         crate::utils::test::to_vec(vec![
             "sha256:a60212791641cbeaa3a49de4f7dff9e40ae50ec19d1be9607232037c1db16702",
@@ -124,8 +124,8 @@ fn serialization() {
     let mut metadata_digests = {
         definition
             .metadata
-            .iter()
-            .map(|(digest, _)| digest.as_str())
+            .keys()
+            .map(|digest| digest.as_str())
             .collect::<Vec<_>>()
     };
 

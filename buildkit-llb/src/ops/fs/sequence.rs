@@ -49,13 +49,12 @@ impl<'a> SequenceOperation<'a> {
 
         self.inner
             .iter()
-            .filter(|fs| fs.output() >= 0)
-            .last()
+            .rfind(|fs| fs.output() >= 0)
             .map(|fs| fs.output() as u32)
     }
 }
 
-impl<'a, 'b: 'a> MultiBorrowedOutput<'b> for SequenceOperation<'b> {
+impl<'b> MultiBorrowedOutput<'b> for SequenceOperation<'b> {
     fn output(&'b self, index: u32) -> OperationOutput<'b> {
         // TODO: check if the requested index available.
         OperationOutput::borrowed(self, OutputIdx(index))
@@ -69,7 +68,7 @@ impl<'a> MultiOwnedOutput<'a> for Arc<SequenceOperation<'a>> {
     }
 }
 
-impl<'a, 'b: 'a> MultiBorrowedLastOutput<'b> for SequenceOperation<'b> {
+impl<'b> MultiBorrowedLastOutput<'b> for SequenceOperation<'b> {
     fn last_output(&'b self) -> Option<OperationOutput<'b>> {
         self.last_output_index().map(|index| self.output(index))
     }

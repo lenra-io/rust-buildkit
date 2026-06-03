@@ -17,7 +17,13 @@ pub mod utils;
 pub mod prelude {
     pub use crate::ops::exec::Mount;
     pub use crate::ops::fs::LayerPath;
+    pub use crate::ops::platform::{self, Platform};
     pub use crate::ops::source::ResolveMode;
     pub use crate::ops::*;
     pub use crate::utils::{OperationOutput, OutputIdx, OwnOutputIdx};
 }
+
+/// Re-export of the BuildKit protobuf types so callers can construct the
+/// option structs (`ChownOpt`, `CacheOpt`, `SecretOpt`, ...) accepted by the
+/// operation builders without depending on `buildkit-proto` directly.
+pub use buildkit_proto::pb;

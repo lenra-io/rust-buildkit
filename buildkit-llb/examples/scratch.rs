@@ -8,7 +8,7 @@ fn main() {
 
     let command = {
         Command::run("/bin/sh")
-            .args(&["-c", "echo 'test string 5' > /out/file0"])
+            .args(["-c", "echo 'test string 5' > /out/file0"])
             .custom_name("create a dummy file")
             .mount(Mount::ReadOnlyLayer(builder_image.output(), "/"))
             .mount(Mount::Scratch(OutputIdx(0), "/out"))

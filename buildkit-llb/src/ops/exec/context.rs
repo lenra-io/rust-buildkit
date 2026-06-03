@@ -30,18 +30,18 @@ impl Context {
     }
 }
 
-impl Into<Meta> for Context {
-    fn into(self) -> Meta {
+impl From<Context> for Meta {
+    fn from(val: Context) -> Self {
         Meta {
             args: {
-                once(self.name.clone())
-                    .chain(self.args.iter().cloned())
+                once(val.name.clone())
+                    .chain(val.args.iter().cloned())
                     .collect()
             },
 
-            env: self.env,
-            cwd: self.cwd.to_string_lossy().into(),
-            user: self.user,
+            env: val.env,
+            cwd: val.cwd.to_string_lossy().into(),
+            user: val.user,
 
             ..Default::default()
         }

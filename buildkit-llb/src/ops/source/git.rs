@@ -12,6 +12,8 @@ pub struct GitSource {
     id: OperationId,
     remote: String,
     reference: Option<String>,
+    keep_git_dir: bool,
+    checksum: Option<String>,
     description: HashMap<String, String>,
     ignore_cache: bool,
 }
@@ -38,6 +40,8 @@ impl GitSource {
             id: OperationId::default(),
             remote,
             reference: None,
+            keep_git_dir: false,
+            checksum: None,
             description: Default::default(),
             ignore_cache: false,
         }
@@ -52,6 +56,23 @@ impl GitSource {
         self.reference = Some(reference.into());
         self
     }
+
+    /// Keep the `.git` directory in the checked-out source
+    /// (`ADD --keep-git-dir`).
+    pub fn with_keep_git_dir(mut self, keep: bool) -> Self {
+        self.keep_git_dir = keep;
+        self
+    }
+
+    /// Validate the resolved commit against the given checksum (`ADD --checksum`).
+    /// For Git sources the checksum is the commit SHA (full or a prefix).
+    pub fn with_checksum<S>(mut self, checksum: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.checksum = Some(checksum.into());
+        self
+    }
 }
 
 impl<'a> SingleBorrowedOutput<'a> for GitSource {
@@ -60,7 +81,7 @@ impl<'a> SingleBorrowedOutput<'a> for GitSource {
     }
 }
 
-impl<'a> SingleOwnedOutput<'static> for Arc<GitSource> {
+impl SingleOwnedOutput<'static> for Arc<GitSource> {
     fn output(&self) -> OperationOutput<'static> {
         OperationOutput::owned(self.clone(), OutputIdx(0))
     }
@@ -95,11 +116,16 @@ impl Operation for GitSource {
             format!("git://{}", self.remote)
         };
 
+        let mut attrs = HashMap::default();
+        if self.keep_git_dir {
+            attrs.insert("git.keepgitdir".into(), "true".into());
+        }
+        if let Some(ref checksum) = self.checksum {
+            attrs.insert("git.checksum".into(), checksum.clone());
+        }
+
         let head = pb::Op {
-            op: Some(Op::Source(SourceOp {
-                identifier,
-                attrs: Default::default(),
-            })),
+            op: Some(Op::Source(SourceOp { identifier, attrs })),
 
             ..Default::default()
         };

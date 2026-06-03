@@ -2,11 +2,15 @@ use std::sync::Arc;
 
 pub mod exec;
 pub mod fs;
+pub mod merge;
+pub mod platform;
 pub mod source;
 pub mod terminal;
 
 pub use self::exec::Command;
 pub use self::fs::FileSystem;
+pub use self::merge::MergeOperation;
+pub use self::platform::Platform;
 pub use self::source::Source;
 pub use self::terminal::Terminal;
 

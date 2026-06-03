@@ -2,7 +2,7 @@
 name = "buildkit-proto"
 version = "0.2.0"
 authors = ["Denys Zariaiev <denys.zariaiev@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 description = "Protobuf interfaces to BuildKit"
 documentation = "https://docs.rs/buildkit-proto"
@@ -15,11 +15,7 @@ license = "MIT/Apache-2.0"
 [dependencies]
 prost = "0.13.4"
 prost-types = "0.13.4"
+tonic = "0.12"
 
 [build-dependencies]
-prost-build = "0.13.4"
-
-[build-dependencies.tonic-build]
-version = "0.1"
-default-features = false
-features = ["transport"]
+tonic-build = "0.12"

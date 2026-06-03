@@ -20,6 +20,13 @@ pub struct CopyOperation<From: Debug, To: Debug> {
     create_path: bool,
     wildcard: bool,
 
+    mode: i32,
+    mode_str: String,
+    owner: Option<pb::ChownOpt>,
+    include_patterns: Vec<String>,
+    exclude_patterns: Vec<String>,
+    unpack: bool,
+
     description: HashMap<String, String>,
     caps: HashMap<String, bool>,
 }
@@ -43,12 +50,19 @@ impl OpWithoutSource {
             create_path: false,
             wildcard: false,
 
+            mode: -1,
+            mode_str: String::new(),
+            owner: None,
+            include_patterns: Vec::new(),
+            exclude_patterns: Vec::new(),
+            unpack: false,
+
             caps,
             description: Default::default(),
         }
     }
 
-    pub fn from<P>(self, source: LayerPath<'_, P>) -> OpWithSource
+    pub fn from<P>(self, source: LayerPath<'_, P>) -> OpWithSource<'_>
     where
         P: AsRef<Path>,
     {
@@ -60,6 +74,13 @@ impl OpWithoutSource {
             recursive: self.recursive,
             create_path: self.create_path,
             wildcard: self.wildcard,
+
+            mode: self.mode,
+            mode_str: self.mode_str,
+            owner: self.owner,
+            include_patterns: self.include_patterns,
+            exclude_patterns: self.exclude_patterns,
+            unpack: self.unpack,
 
             description: self.description,
             caps: self.caps,
@@ -80,6 +101,13 @@ impl<'a> OpWithSource<'a> {
             recursive: self.recursive,
             create_path: self.create_path,
             wildcard: self.wildcard,
+
+            mode: self.mode,
+            mode_str: self.mode_str,
+            owner: self.owner,
+            include_patterns: self.include_patterns,
+            exclude_patterns: self.exclude_patterns,
+            unpack: self.unpack,
 
             description: self.description,
             caps: self.caps,
@@ -115,6 +143,56 @@ where
 
     pub fn wildcard(mut self, value: bool) -> Self {
         self.wildcard = value;
+        self
+    }
+
+    /// Override the permission bits of the copied files (`COPY --chmod`).
+    /// Pass the mode as an integer (e.g. `0o755`); `-1` keeps the source mode.
+    pub fn chmod(mut self, mode: i32) -> Self {
+        self.mode = mode;
+        self
+    }
+
+    /// Override the permissions of the copied files using a non-octal mode
+    /// string (used when the value can't be represented as octal bits).
+    pub fn chmod_str<S>(mut self, mode: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.mode_str = mode.into();
+        self
+    }
+
+    /// Override the owner of the copied files (`COPY --chown`).
+    pub fn chown(mut self, owner: pb::ChownOpt) -> Self {
+        self.owner = Some(owner);
+        self
+    }
+
+    /// Only copy files/directories matching at least one of these patterns.
+    pub fn include_patterns<I, S>(mut self, patterns: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.include_patterns = patterns.into_iter().map(Into::into).collect();
+        self
+    }
+
+    /// Exclude files/directories matching any of these patterns (`COPY --exclude`).
+    pub fn exclude_patterns<I, S>(mut self, patterns: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.exclude_patterns = patterns.into_iter().map(Into::into).collect();
+        self
+    }
+
+    /// Automatically unpack a source archive into the destination (`ADD` archive
+    /// behaviour).
+    pub fn unpack(mut self, value: bool) -> Self {
+        self.unpack = value;
         self
     }
 }
@@ -201,8 +279,13 @@ impl<'a> FileOperation for OpWithDestination<'a> {
                 create_dest_path: self.create_path,
                 allow_wildcard: self.wildcard,
 
-                // TODO: make this configurable
-                mode: -1,
+                owner: self.owner.clone(),
+                mode: self.mode,
+                mode_str: self.mode_str.clone(),
+
+                attempt_unpack_docker_compatibility: self.unpack,
+                include_patterns: self.include_patterns.clone(),
+                exclude_patterns: self.exclude_patterns.clone(),
 
                 // TODO: make this configurable
                 timestamp: -1,

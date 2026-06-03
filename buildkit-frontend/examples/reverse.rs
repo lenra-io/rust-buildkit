@@ -13,7 +13,7 @@ use buildkit_llb::prelude::*;
 async fn main() {
     env_logger::init();
 
-    if let Err(_) = run_frontend(ReverseFrontend).await {
+    if run_frontend(ReverseFrontend).await.is_err() {
         std::process::exit(1);
     }
 }
@@ -40,18 +40,13 @@ impl ReverseFrontend {
 
             architecture: Architecture::Amd64,
             os: OperatingSystem::Linux,
+            os_version: None,
+            os_features: None,
+            variant: None,
 
             config: Some(ImageConfig {
-                entrypoint: None,
                 cmd: Some(vec!["/bin/cat".into(), OUTPUT_FILENAME.into()]),
-                env: None,
-                user: None,
-                working_dir: None,
-
-                labels: None,
-                volumes: None,
-                exposed_ports: None,
-                stop_signal: None,
+                ..Default::default()
             }),
 
             rootfs: None,
@@ -72,7 +67,6 @@ impl ReverseFrontend {
         let transformed_contents: String = {
             String::from_utf8_lossy(&dockerfile_contents)
                 .lines()
-                .into_iter()
                 .map(|line| {
                     line.trim()
                         .chars()

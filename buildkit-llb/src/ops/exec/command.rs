@@ -11,6 +11,7 @@ use either::Either;
 use super::context::Context;
 use super::mount::Mount;
 
+use crate::ops::platform::Platform;
 use crate::ops::{MultiBorrowedOutput, MultiOwnedOutput, OperationBuilder};
 use crate::serialization::{Context as SerializationCtx, Node, Operation, OperationId, Result};
 use crate::utils::{OperationOutput, OutputIdx};
@@ -27,6 +28,10 @@ pub struct Command<'a> {
     description: HashMap<String, String>,
     caps: HashMap<String, bool>,
     ignore_cache: bool,
+    platform: Option<Platform>,
+    network: NetMode,
+    security: SecurityMode,
+    secret_env: Vec<pb::SecretEnv>,
 }
 
 impl<'a> Command<'a> {
@@ -44,7 +49,45 @@ impl<'a> Command<'a> {
             description: Default::default(),
             caps: Default::default(),
             ignore_cache: false,
+            platform: None,
+            network: NetMode::Unset,
+            security: SecurityMode::Sandbox,
+            secret_env: Vec::new(),
         }
+    }
+
+    /// Expose a secret to the command as an environment variable
+    /// (`RUN --mount=type=secret,env=...`).
+    pub fn secret_env(mut self, secret: pb::SecretEnv) -> Self {
+        self.caps.insert("exec.mount.secret".into(), true);
+        self.secret_env.push(secret);
+        self
+    }
+
+    /// Set the networking mode for the command (`RUN --network`).
+    pub fn network(mut self, network: NetMode) -> Self {
+        if let NetMode::Host = network {
+            self.caps.insert("exec.meta.network.host".into(), true);
+        }
+        self.network = network;
+        self
+    }
+
+    /// Set the security mode for the command (`RUN --security`).
+    pub fn security(mut self, security: SecurityMode) -> Self {
+        if let SecurityMode::Insecure = security {
+            self.caps.insert("exec.meta.security.insecure".into(), true);
+        }
+        self.security = security;
+        self
+    }
+
+    /// Pin this exec op to a specific platform. The op will only be scheduled
+    /// on a worker that advertises matching platform capabilities, which is
+    /// what enables cross-compilation in multi-platform builds.
+    pub fn platform(mut self, platform: Platform) -> Self {
+        self.platform = Some(platform);
+        self
     }
 
     pub fn args<A, S>(mut self, args: A) -> Self
@@ -102,21 +145,32 @@ impl<'a> Command<'a> {
         P: AsRef<Path>,
     {
         match mount {
-            Mount::Layer(..) | Mount::ReadOnlyLayer(..) | Mount::Scratch(..) => {
+            Mount::Layer(..)
+            | Mount::ReadOnlyLayer(..)
+            | Mount::ReadWriteLayer(..)
+            | Mount::Scratch(..) => {
                 self.caps.insert("exec.mount.bind".into(), true);
             }
 
-            Mount::ReadOnlySelector(..) => {
+            Mount::ReadOnlySelector(..) | Mount::ReadWriteSelector(..) => {
                 self.caps.insert("exec.mount.bind".into(), true);
                 self.caps.insert("exec.mount.selector".into(), true);
             }
 
-            Mount::SharedCache(..) => {
+            Mount::SharedCache(..) | Mount::Cache(..) | Mount::CacheFrom(..) => {
                 self.caps.insert("exec.mount.cache".into(), true);
                 self.caps.insert("exec.mount.cache.sharing".into(), true);
             }
 
-            Mount::OptionalSshAgent(..) => {
+            Mount::Tmpfs(..) => {
+                self.caps.insert("exec.mount.tmpfs".into(), true);
+            }
+
+            Mount::Secret(..) => {
+                self.caps.insert("exec.mount.secret".into(), true);
+            }
+
+            Mount::OptionalSshAgent(..) | Mount::Ssh(..) => {
                 self.caps.insert("exec.mount.ssh".into(), true);
             }
         }
@@ -131,7 +185,7 @@ impl<'a> Command<'a> {
     }
 }
 
-impl<'a, 'b: 'a> MultiBorrowedOutput<'b> for Command<'b> {
+impl<'b> MultiBorrowedOutput<'b> for Command<'b> {
     fn output(&'b self, index: u32) -> OperationOutput<'b> {
         // TODO: check if the requested index available.
         OperationOutput::borrowed(self, OutputIdx(index))
@@ -207,6 +261,40 @@ impl<'a> Operation for Command<'a> {
                             ..Default::default()
                         },
 
+                        Mount::ReadWriteLayer(_, destination) => pb::Mount {
+                            input: last_input_index,
+                            dest: destination.to_string_lossy().into(),
+                            output: -1,
+                            readonly: false,
+                            mount_type: MountType::Bind as i32,
+
+                            ..Default::default()
+                        },
+
+                        Mount::ReadWriteSelector(_, destination, source) => pb::Mount {
+                            input: last_input_index,
+                            dest: destination.to_string_lossy().into(),
+                            output: -1,
+                            readonly: false,
+                            selector: source.to_string_lossy().into(),
+                            mount_type: MountType::Bind as i32,
+
+                            ..Default::default()
+                        },
+
+                        Mount::CacheFrom(_, destination, selector, opt, readonly) => pb::Mount {
+                            input: last_input_index,
+                            dest: destination.to_string_lossy().into(),
+                            output: -1,
+                            readonly: *readonly,
+                            selector: selector.to_string_lossy().into(),
+                            mount_type: MountType::Cache as i32,
+
+                            cache_opt: Some(opt.clone()),
+
+                            ..Default::default()
+                        },
+
                         Mount::Scratch(output, path) => {
                             let mount = pb::Mount {
                                 input: -1,
@@ -260,22 +348,84 @@ impl<'a> Operation for Command<'a> {
 
                             return (Either::Right(empty()), mount);
                         }
+
+                        Mount::Cache(path, opt, readonly) => {
+                            let mount = pb::Mount {
+                                input: -1,
+                                dest: path.to_string_lossy().into(),
+                                output: -1,
+                                readonly: *readonly,
+                                mount_type: MountType::Cache as i32,
+
+                                cache_opt: Some(opt.clone()),
+
+                                ..Default::default()
+                            };
+
+                            return (Either::Right(empty()), mount);
+                        }
+
+                        Mount::Tmpfs(path, opt) => {
+                            let mount = pb::Mount {
+                                input: -1,
+                                dest: path.to_string_lossy().into(),
+                                output: -1,
+                                mount_type: MountType::Tmpfs as i32,
+
+                                tmpfs_opt: Some(*opt),
+
+                                ..Default::default()
+                            };
+
+                            return (Either::Right(empty()), mount);
+                        }
+
+                        Mount::Secret(path, opt) => {
+                            let mount = pb::Mount {
+                                input: -1,
+                                dest: path.to_string_lossy().into(),
+                                output: -1,
+                                mount_type: MountType::Secret as i32,
+
+                                secret_opt: Some(opt.clone()),
+
+                                ..Default::default()
+                            };
+
+                            return (Either::Right(empty()), mount);
+                        }
+
+                        Mount::Ssh(path, opt) => {
+                            let mount = pb::Mount {
+                                input: -1,
+                                dest: path.to_string_lossy().into(),
+                                output: -1,
+                                mount_type: MountType::Ssh as i32,
+
+                                ssh_opt: Some(opt.clone()),
+
+                                ..Default::default()
+                            };
+
+                            return (Either::Right(empty()), mount);
+                        }
                     };
 
                     let input = match mount {
                         Mount::ReadOnlyLayer(input, ..) => input,
                         Mount::ReadOnlySelector(input, ..) => input,
+                        Mount::ReadWriteLayer(input, ..) => input,
+                        Mount::ReadWriteSelector(input, ..) => input,
+                        Mount::CacheFrom(input, ..) => input,
                         Mount::Layer(_, input, ..) => input,
 
-                        Mount::SharedCache(..) => {
-                            unreachable!();
-                        }
-
-                        Mount::Scratch(..) => {
-                            unreachable!();
-                        }
-
-                        Mount::OptionalSshAgent(..) => {
+                        Mount::SharedCache(..)
+                        | Mount::Cache(..)
+                        | Mount::Tmpfs(..)
+                        | Mount::Secret(..)
+                        | Mount::Scratch(..)
+                        | Mount::OptionalSshAgent(..)
+                        | Mount::Ssh(..) => {
                             unreachable!();
                         }
                     };
@@ -296,13 +446,15 @@ impl<'a> Operation for Command<'a> {
         let head = pb::Op {
             op: Some(Op::Exec(ExecOp {
                 mounts,
-                network: NetMode::Unset.into(),
-                security: SecurityMode::Sandbox.into(),
+                network: self.network.into(),
+                security: self.security.into(),
                 meta: Some(self.context.clone().into()),
-                secretenv: Vec::new(),
+                secretenv: self.secret_env.clone(),
+                cdi_devices: Vec::new(),
             })),
 
             inputs: inputs.into_iter().flatten().collect(),
+            platform: self.platform.clone(),
 
             ..Default::default()
         };

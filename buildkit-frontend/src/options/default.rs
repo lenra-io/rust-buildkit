@@ -157,10 +157,10 @@ mod tests {
         ]))
         .unwrap();
 
-        assert_eq!(options.has("option1"), true);
-        assert_eq!(options.has("option2"), true);
-        assert_eq!(options.has("option3"), false);
-        assert_eq!(options.has("option4"), true);
+        assert!(options.has("option1"));
+        assert!(options.has("option2"));
+        assert!(!options.has("option3"));
+        assert!(options.has("option4"));
     }
 
     #[test]
@@ -172,14 +172,14 @@ mod tests {
         ]))
         .unwrap();
 
-        assert_eq!(options.has_value("option1", ""), false);
-        assert_eq!(options.has_value("option1", "any_other"), false);
-        assert_eq!(options.has_value("option2", ""), false);
-        assert_eq!(options.has_value("option2", "any_other"), false);
-        assert_eq!(options.has_value("option3", "true"), true);
-        assert_eq!(options.has_value("option3", "false"), true);
-        assert_eq!(options.has_value("option3", "any_other"), true);
-        assert_eq!(options.has_value("option3", "missing"), false);
+        assert!(!options.has_value("option1", ""));
+        assert!(!options.has_value("option1", "any_other"));
+        assert!(!options.has_value("option2", ""));
+        assert!(!options.has_value("option2", "any_other"));
+        assert!(options.has_value("option3", "true"));
+        assert!(options.has_value("option3", "false"));
+        assert!(options.has_value("option3", "any_other"));
+        assert!(!options.has_value("option3", "missing"));
     }
 
     #[test]

@@ -13,11 +13,11 @@ use buildkit_frontend::{Bridge, Frontend, FrontendOutput, OutputRef};
 
 use buildkit_llb::prelude::*;
 
-#[tokio::main(threaded_scheduler)]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() {
     env_logger::init();
 
-    if let Err(_) = run_frontend(DownloadFrontend).await {
+    if run_frontend(DownloadFrontend).await.is_err() {
         std::process::exit(1);
     }
 }
@@ -59,18 +59,15 @@ impl DownloadFrontend {
 
             architecture: Architecture::Amd64,
             os: OperatingSystem::Linux,
+            os_version: None,
+            os_features: None,
+            variant: None,
 
             config: Some(ImageConfig {
                 entrypoint: Some(vec!["/bin/sh".into()]),
                 cmd: Some(vec!["-c".into(), "/usr/bin/sha256sum *".into()]),
-                env: None,
-                user: None,
                 working_dir: Some(OUTPUT_DIR.into()),
-
-                labels: None,
-                volumes: None,
-                exposed_ports: None,
-                stop_signal: None,
+                ..Default::default()
             }),
 
             rootfs: None,
@@ -102,7 +99,7 @@ impl DownloadFrontend {
         let alpine = Source::image("alpine:latest").ref_counted();
 
         let builder_rootfs = Command::run("apk")
-            .args(&["add", "curl"])
+            .args(["add", "curl"])
             .custom_name("Installing curl")
             .mount(Mount::Layer(OutputIdx(0), alpine.output(), "/"))
             .ref_counted();
@@ -113,7 +110,7 @@ impl DownloadFrontend {
                 let full_path = PathBuf::from(OUTPUT_DIR).join(&relative_path);
 
                 let op = Command::run("curl")
-                    .args(&[&url.to_string(), "-o", &full_path.to_string_lossy()])
+                    .args([url.as_ref(), "-o", &full_path.to_string_lossy()])
                     .mount(Mount::ReadOnlyLayer(builder_rootfs.output(0), "/"))
                     .mount(Mount::Scratch(OutputIdx(0), OUTPUT_DIR))
                     .custom_name(format!("Downloading '{}'", relative_path.display()))
@@ -149,7 +146,7 @@ impl DownloadFrontend {
         let cmd_regex = Regex::new(r#"Download\s+"(.+)"\s+as\s+"(.+)""#).unwrap();
 
         dockerfile.lines().filter_map(move |line| {
-            let captures = cmd_regex.captures(&line)?;
+            let captures = cmd_regex.captures(line)?;
             Some(Url::parse(&captures[1]).map(|url| (url, captures[2].into())))
         })
     }

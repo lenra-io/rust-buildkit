@@ -6,6 +6,7 @@ use buildkit_proto::pb::{self, op::Op, OpMetadata, SourceOp};
 use lazy_static::*;
 use regex::Regex;
 
+use crate::ops::platform::Platform;
 use crate::ops::{OperationBuilder, SingleBorrowedOutput, SingleOwnedOutput};
 use crate::serialization::{Context, Node, Operation, OperationId, Result};
 use crate::utils::{OperationOutput, OutputIdx};
@@ -22,10 +23,12 @@ pub struct ImageSource {
     description: HashMap<String, String>,
     ignore_cache: bool,
     resolve_mode: Option<ResolveMode>,
+    platform: Option<Platform>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub enum ResolveMode {
+    #[default]
     Default,
     ForcePull,
     PreferLocal,
@@ -38,12 +41,6 @@ impl fmt::Display for ResolveMode {
             ResolveMode::ForcePull => write!(f, "pull"),
             ResolveMode::PreferLocal => write!(f, "local"),
         }
-    }
-}
-
-impl Default for ResolveMode {
-    fn default() -> Self {
-        ResolveMode::Default
     }
 }
 
@@ -119,6 +116,7 @@ impl ImageSource {
             description: Default::default(),
             ignore_cache: false,
             resolve_mode: None,
+            platform: None,
         }
     }
 
@@ -129,6 +127,20 @@ impl ImageSource {
 
     pub fn resolve_mode(&self) -> Option<ResolveMode> {
         self.resolve_mode
+    }
+
+    /// Constrain the image to a specific platform. The platform is both
+    /// recorded on the LLB op (so cross-platform manifest resolution picks
+    /// the matching layer) and exposed via [`platform()`](Self::platform)
+    /// for callers that need to pass it to
+    /// [`Bridge::resolve_image_config`](https://docs.rs/buildkit-frontend).
+    pub fn with_platform(mut self, platform: Platform) -> Self {
+        self.platform = Some(platform);
+        self
+    }
+
+    pub fn platform(&self) -> Option<&Platform> {
+        self.platform.as_ref()
     }
 
     pub fn with_digest<S>(mut self, digest: S) -> Self
@@ -171,7 +183,7 @@ impl<'a> SingleBorrowedOutput<'a> for ImageSource {
     }
 }
 
-impl<'a> SingleOwnedOutput<'static> for Arc<ImageSource> {
+impl SingleOwnedOutput<'static> for Arc<ImageSource> {
     fn output(&self) -> OperationOutput<'static> {
         OperationOutput::owned(self.clone(), OutputIdx(0))
     }
@@ -211,6 +223,7 @@ impl Operation for ImageSource {
                 identifier: format!("docker-image://{}", self.canonical_name()),
                 attrs,
             })),
+            platform: self.platform.clone(),
 
             ..Default::default()
         };
@@ -284,6 +297,33 @@ fn serialization() {
             Op::Source(SourceOp {
                 identifier: "docker-image://docker.io/rustlang/rust:nightly@sha256:123456".into(),
                 attrs: Default::default(),
+            })
+        },
+    );
+}
+
+#[test]
+fn serialization_with_platform() {
+    use crate::ops::platform;
+
+    crate::check_op!(
+        ImageSource::new("library/alpine:latest").with_platform(platform::linux_arm_v7()),
+        |description| { vec![] },
+        |caps| { vec![] },
+        |cached_tail| { vec![] },
+        |inputs| { vec![] },
+        |op| {
+            Op::Source(SourceOp {
+                identifier: "docker-image://docker.io/library/alpine:latest".into(),
+                attrs: Default::default(),
+            })
+        },
+        |platform| {
+            Some(pb::Platform {
+                os: "linux".into(),
+                architecture: "arm".into(),
+                variant: "v7".into(),
+                ..Default::default()
             })
         },
     );

@@ -23,7 +23,7 @@ where
     };
 
     let deserializer = EnvDeserializer {
-        vals: pairs.map(|value| extract_name_and_value(&value)),
+        vals: pairs.map(|value| extract_name_and_value(value)),
     };
 
     T::deserialize(deserializer).map_err(Error::from)
@@ -44,7 +44,7 @@ enum EnvValue<'de> {
 #[derive(Debug)]
 struct EnvItem<'de>(&'de str);
 
-fn extract_name_and_value(mut raw_value: &str) -> (&str, EnvValue) {
+fn extract_name_and_value(mut raw_value: &str) -> (&str, EnvValue<'_>) {
     if raw_value.starts_with("build-arg:") {
         raw_value = raw_value.trim_start_matches("build-arg:");
     }
@@ -54,7 +54,7 @@ fn extract_name_and_value(mut raw_value: &str) -> (&str, EnvValue) {
 
     match parts.next() {
         None => (name, EnvValue::Flag),
-        Some(text) if text.is_empty() => (name, EnvValue::Flag),
+        Some("") => (name, EnvValue::Flag),
         Some(text) if &text[0..1] == "[" || &text[0..1] == "{" => (name, EnvValue::Json(text)),
         Some(text) => (name, EnvValue::Text(text)),
     }

@@ -9,7 +9,7 @@ fn main() {
     let alpine = Source::image("library/alpine:latest");
     let bitflags_unpacked = {
         Command::run("/bin/tar")
-            .args(&[
+            .args([
                 "-xvzC",
                 "/out",
                 "--strip-components=1",
