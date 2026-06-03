@@ -2,7 +2,7 @@
 name = "buildkit-llb"
 version = "0.2.0"
 authors = ["Denys Zariaiev <denys.zariaiev@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 description = "Idiomatic high-level API to create BuildKit LLB graphs"
 documentation = "https://docs.rs/buildkit-llb"

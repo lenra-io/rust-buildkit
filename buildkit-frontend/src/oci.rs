@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::convert::TryFrom;
 use std::path::PathBuf;
 use std::time::Duration;
 
@@ -13,7 +12,6 @@ use serde_json::Value;
 /// containerd all read/write durations as nanos.
 mod opt_duration_nanos {
     use serde::{Deserialize, Deserializer, Serializer};
-    use std::convert::TryFrom;
     use std::time::Duration;
 
     pub fn serialize<S>(d: &Option<Duration>, s: S) -> Result<S::Ok, S::Error>

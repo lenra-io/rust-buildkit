@@ -2,7 +2,7 @@
 name = "buildkit-frontend"
 version = "0.3.0"
 authors = ["Denys Zariaiev <denys.zariaiev@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 description = "Foundation for BuildKit frontends implemented in Rust"
 documentation = "https://docs.rs/buildkit-frontend"
