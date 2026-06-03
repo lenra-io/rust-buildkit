@@ -372,7 +372,7 @@ impl<'a> Operation for Command<'a> {
                                 output: -1,
                                 mount_type: MountType::Tmpfs as i32,
 
-                                tmpfs_opt: Some(opt.clone()),
+                                tmpfs_opt: Some(*opt),
 
                                 ..Default::default()
                             };
