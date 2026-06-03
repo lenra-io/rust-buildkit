@@ -1,3 +1,4 @@
+use std::fmt;
 use std::str::FromStr;
 
 use crate::pb::Platform;
@@ -16,12 +17,12 @@ impl FromStr for Platform {
     }
 }
 
-impl ToString for Platform {
-    fn to_string(&self) -> String {
+impl fmt::Display for Platform {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.variant.is_empty() {
-            format!("{}/{}", self.os, self.architecture)
+            write!(f, "{}/{}", self.os, self.architecture)
         } else {
-            format!("{}/{}/{}", self.os, self.architecture, self.variant)
+            write!(f, "{}/{}/{}", self.os, self.architecture, self.variant)
         }
     }
 }
